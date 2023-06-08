@@ -1,0 +1,4 @@
+CALL gds.pageRank.stream('myGraph')
+             YIELD nodeId, score
+             RETURN gds.util.asNode(nodeId).person_id AS person_id, score
+             ORDER BY score DESC, person_id ASC limit 4;
