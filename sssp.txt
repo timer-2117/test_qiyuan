@@ -1,0 +1,16 @@
+match (source:person {person_id: 1})
+CALL gds.allShortestPaths.delta.stream('myGraph', {
+   sourceNode: source,
+   relationshipWeightProperty: 'cost',
+   delta: 3.0
+})
+YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
+RETURN
+   index,
+   gds.util.asNode(sourceNode).person_id as sourcePersonId,
+    gds.util.asNode(targetNode).person_id as targetPersonId,
+    totalCost,
+   [nodeId IN nodeIds | gds.util.asNode(nodeId).person_id] AS nodeId,
+    costs,
+   nodes(path) as path
+ORDER BY index limit 4;
