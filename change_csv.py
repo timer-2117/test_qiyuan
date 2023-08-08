@@ -1,21 +1,16 @@
-import pandas as pd                     #pandas是一个强大的分析结构化数据的工具集
+import dask.dataframe as dd
 
+read_path = './edge.csv'
+write_path = './edge_neo4j.csv'
 
-read_path='./import/gsh-2015-edge.csv'
-write_path='./import/gsh-2015-edge_1.csv'
-# 将csv文件内数据读出
-ngData=pd.read_csv(read_path,chunksize=1000000)
+# 使用Dask读取csv文件，你可以指定chunksize参数来设置每个分块的大小
+ddf = dd.read_csv(read_path)
 
-#添加新列‘名字长度’（length）
-for chunk in ngData:                                    #遍历数据表，计算每一位名字的长度
-    ngList=[]
-    for i in range(len(chunk)):
-        ngList.append('knows')
-    chunk['knows']=ngList                                     #注明列名，就可以直接添加新列
-    chunk.to_csv(write_path,index=False,chunksize=1000000)         #把数据写入数据集，index=False表示不加索引
-#注意这里的ngData['length']=ngList是直接在原有数据基础上加了一列新的数据，也就是说现在的ngData已经具备完整的3列数据
-#不用再在to_csv中加mode=‘a’这个参数，实现不覆盖添加。
+# Dask Dataframe的操作是惰性的，这意味着计算不会立即执行，只有在你调用.compute()方法时才会执行
+# 这让Dask能够更智能地优化整个计算过程
+ddf['knows'] = 'knows'
 
-#查看修改后的csv文件
+# 将结果写入csv文件，注意这将会触发实际的计算
+ddf.to_csv(write_path, single_file=True, index=False)
+
 print("done\n")
-
