@@ -1,21 +1,18 @@
-import pandas as pd			#pandas是一个强大的分析结构化数据的工具集
+import pandas as pd
 
+read_path = '../jiuyuan_twitter_dataset/twitter_edge.csv'
+write_path = '../neo4j_twitter_dataset/edge.csv'
 
-read_path='./import/gsh-2015-edge.csv'
-write_path='./import/gsh-2015-edge_1.csv'
-# 将csv文件内数据读出
-ngData=pd.read_csv(read_path,chunksize=1000000)
+chunksize = 1_000_000
+first_chunk = True
 
-#添加新列‘名字长度’（length）
-for chunk in ngData:			                #遍历数据表，计算每一位名字的长度
-    ngList=[]
-    for i in range(len(chunk)):
-        ngList.append('knows')
-    chunk['knows']=ngList                                     #注明列名，就可以直接添加新列
-    chunk.to_csv(write_path,index=False,chunksize=1000000)         #把数据写入数据集，index=False表示不加索引
-#注意这里的ngData['length']=ngList是直接在原有数据基础上加了一列新的数据，也就是说现在的ngData已经具备完整的3列数据
-#不用再在to_csv中加mode=‘a’这个参数，实现不覆盖添加。
+# 指定三列，名字随意，只要数量匹配即可
+# 分批读取 CSV 文件，每次处理一个块，添加新列 'knows'，然后写入新的 CSV 文件
+for chunk in pd.read_csv(read_path, chunksize=chunksize, header=None,
+                         names=['col1', 'col2', 'col3']):
+    chunk['knows'] = 'knows'
+    mode = 'w' if first_chunk else 'a'
+    chunk.to_csv(write_path, mode=mode, header=False, index=False)
+    first_chunk = False
 
-#查看修改后的csv文件
-print("done\n")
-
+print("处理完成")
